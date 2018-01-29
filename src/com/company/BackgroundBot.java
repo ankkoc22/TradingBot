@@ -10,7 +10,11 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-
+import com.mongodb.MongoClient;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
 
 public class BackgroundBot {
 
@@ -22,6 +26,7 @@ public class BackgroundBot {
     private String KEY_MARKET_NAME = "MarketName";
     private String KEY_ASK = "Ask";
     private String KEY_BID = "Bid";
+    public MarketAskName highestEth = new MarketAskName();
 
 
     public void getAnswer() throws Exception {
@@ -109,7 +114,7 @@ public class BackgroundBot {
             }
         }
         double max = Double.MIN_VALUE;
-        MarketAskName highestEth = new MarketAskName();
+
         MSUrlConnection.disconnect();
         Iterator<MarketAskName> iterator = marketAskNames.iterator();
         while (iterator.hasNext()) {
@@ -144,6 +149,21 @@ public class BackgroundBot {
 
         System.out.println(Double.parseDouble(bid) * (Double.parseDouble(highestEth.getBid()) * highestEth.getCoins()));
         urlConnection.disconnect();
+
+        MongoClient mongoClient = new MongoClient("localhost",27017);
+        DB database = mongoClient.getDB("TradingBot");
+        DBCollection collecction = database.getCollection("Arbitraj");
+
+        DBObject person = new BasicDBObject("_id",MarketAskName.cycle );
+        MarketAskName.cycle++;
+            person.put("Market", new BasicDBObject("MarketName",highestEth.getMarketName())
+                                                    .append("Ask",Double.parseDouble(highestEth.getAsk()))
+                                                        .append("Coins",highestEth.getCoins())
+                                                        .append("Bid",Double.parseDouble(highestEth.getBid()))
+                                                        .append("Rate of Coins",(Double.parseDouble(highestEth.getBid()) * highestEth.getCoins()))
+                                                        .append("New BTC",Double.parseDouble(bid) * (Double.parseDouble(highestEth.getBid()) * highestEth.getCoins())));
+
+        collecction.insert(person);
 
 
     }

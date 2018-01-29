@@ -5,8 +5,10 @@ public class MarketAskName {
     private String marketName;
     private String ask;
     private String bid;
+    public static int cycle=1;
 
-    public MarketAskName(){}
+    public MarketAskName(){
+    }
 
     public MarketAskName(String marketName, String ask) {
         this.marketName = marketName;
